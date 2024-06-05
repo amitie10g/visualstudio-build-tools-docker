@@ -7,8 +7,13 @@ jobs:
   ltsc2022:
     strategy:
       matrix:
-        WIN_VER: ["2022", "2019"]
-        VS_VER: ["2022", "2019", "2017"]
+        WIN_VER: 
+        - 2022
+        - 2019
+        VS_VER:
+        - 2022
+        - 2019
+        - 2017
     runs-on: windows-${{ matrix.WIN_VER }}
     steps:
     - name: Checkout
@@ -29,12 +34,19 @@ jobs:
     - name: Pull and tag parent image
       run: |
         docker pull ghcr.io/${{ github.repository_owner }}/chocolatey:ltsc${{ matrix.WIN_VER }}
-        docker tag ghcr.io/${{ github.repository_owner }}/chocolatey:ltsc${{ matrix.WIN_VER }} ${{ secrets.DOCKERHUB_USERNAME }}/chocolatey:ltsc${{ matrix.WIN_VER }}
+        docker tag  ghcr.io/${{ github.repository_owner }}/chocolatey:ltsc${{ matrix.WIN_VER }} ${{ secrets.DOCKERHUB_USERNAME }}/chocolatey:ltsc${{ matrix.WIN_VER }}
     - name: Build
-      run:  |
-        $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }} -t ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }}"
-        if ( ${{ matrix.WIN_VER }} -eq "2022" ) { $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools -t ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools" }
-        docker build $TAGS --build-arg WIN_VER=${{ matrix.WIN_VER }} --build-arg VS_VER=${{ matrix.VS_VER }} .
+      run: >
+        docker build
+        --build-arg WIN_VER=${{ matrix.WIN_VER }} --build-arg VS_VER=${{ matrix.VS_VER }}
+        -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }}
+        -t ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }}
+        .
+    - name: Tag latest
+      if: ${{matrix.WIN_VER == 2022 }}
+      run: |
+        docker tag ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }} ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools
+        docker tag ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }} ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools
     - name: push
       run: |
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools --all-tags
