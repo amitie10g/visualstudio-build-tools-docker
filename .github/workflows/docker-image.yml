@@ -1,51 +1,41 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
-  schedule: 
-   - cron: "30 0 * * 0"
 
 jobs:
   ltsc2022:
     strategy:
       matrix:
+        WIN_VER: ["2022", "2019"]
         VS_VER: ["2022", "2019", "2017"]
-    runs-on: windows-2022
-    env:
-      WIN_VER: ltsc2022
+    runs-on: windows-${{ matrix.WIN_VER }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: build
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:${{ env.WIN_VER }} --build-arg WIN_VER=${{ env.WIN_VER }} --build-arg VS_VER=${{ matrix.VS_VER }} .
-      - name: push
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools --all-tags
-
-  ltsc2019:
-    strategy:
-      matrix:
-        VS_VER: ["2022", "2019", "2017"]
-    runs-on: windows-2019
-    env:
-      WIN_VER: ltsc2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: build
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:${{ env.WIN_VER }} --build-arg WIN_VER=${{ env.WIN_VER }} --build-arg VS_VER=${{ matrix.VS_VER }} .
-      - name: push
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools --all-tags
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pull and tag parent image
+      run: |
+        docker pull ghcr.io/${{ github.repository_owner }}/chocolatey:ltsc${{ matrix.WIN_VER }}
+        docker tag ghcr.io/${{ github.repository_owner }}/chocolatey:ltsc${{ matrix.WIN_VER }} ${{ secrets.DOCKERHUB_USERNAME }}/chocolatey:ltsc${{ matrix.WIN_VER }}
+    - name: Build
+      run:  |
+        $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }} -t ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }}"
+        if ( ${{ matrix.WIN_VER }} -eq "2022" ) { $TAGS += " -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools -t ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools" }
+        docker build $TAGS --build-arg WIN_VER=${{ matrix.WIN_VER }} --build-arg VS_VER=${{ matrix.VS_VER }} .
+    - name: push
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools --all-tags
+        docker push ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools --all-tags
