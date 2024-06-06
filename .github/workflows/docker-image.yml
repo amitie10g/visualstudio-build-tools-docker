@@ -15,6 +15,9 @@ jobs:
         - 2019
         - 2017
     runs-on: windows-${{ matrix.WIN_VER }}
+    permissions:
+      contents: read
+      packages: write
     steps:
     - name: Checkout
       uses: actions/checkout@v4
