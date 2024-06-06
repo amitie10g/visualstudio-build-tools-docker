@@ -38,7 +38,7 @@ jobs:
     - name: Build
       run: >
         docker build
-        --build-arg WIN_VER=${{ matrix.WIN_VER }} --build-arg VS_VER=${{ matrix.VS_VER }}
+        --build-arg WIN_VER=ltsc${{ matrix.WIN_VER }} --build-arg VS_VER=${{ matrix.VS_VER }}
         -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }}
         -t ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools:ltsc${{ matrix.WIN_VER }}
         .
