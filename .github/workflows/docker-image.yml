@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  ltsc2022:
+  build:
     strategy:
       matrix:
         WIN_VER: 
@@ -54,3 +54,14 @@ jobs:
       run: |
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools --all-tags
         docker push ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools --all-tags
+
+  trigger-next-workflow:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Trigger next workflow (visualstudio-workload-vctools-docker)
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: docker-image.yml
+          repo: amitie10g/visualstudio-workload-vctools-docker
+          token: ${{ secrets.VISUALSTUDIO_WORKLOAD_VCTOOLS_DOCKER }}
