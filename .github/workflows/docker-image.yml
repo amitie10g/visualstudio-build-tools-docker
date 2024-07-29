@@ -63,5 +63,5 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: docker-image.yml
-          repo: amitie10g/amitie10g/visualstudio-workload-docker
+          repo: ${{ github.repository_owner }}/visualstudio-workload-docker
           token: ${{ secrets.VISUALSTUDIO_WORKLOAD_VCTOOLS_DOCKER }}
