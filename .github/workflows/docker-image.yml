@@ -59,9 +59,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Trigger next workflow (visualstudio-workload-vctools-docker)
+      - name: Trigger next workflow (visualstudio-workload-docker)
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: docker-image.yml
-          repo: amitie10g/visualstudio-workload-vctools-docker
+          repo: amitie10g/amitie10g/visualstudio-workload-docker
           token: ${{ secrets.VISUALSTUDIO_WORKLOAD_VCTOOLS_DOCKER }}
