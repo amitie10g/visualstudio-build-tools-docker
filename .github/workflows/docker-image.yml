@@ -44,8 +44,9 @@ jobs:
       run: >
         docker build
         --build-arg WIN_VER=${{ matrix.WIN_VER }} --build-arg VS_VER=${{ matrix.VS_VER }}
-        -t ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:${{ matrix.WIN_VER }}
-        -t ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools:${{ matrix.WIN_VER }}
+        --tag=${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:${{ matrix.WIN_VER }}
+        --tag=ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools:${{ matrix.WIN_VER }}
+        --isolation=hyperv
         .
     - name: Tag latest
       if: ${{matrix.WIN_VER == 2022 }}
