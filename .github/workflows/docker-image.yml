@@ -7,14 +7,23 @@ jobs:
   build:
     strategy:
       matrix:
-        WIN_VER: 
-        - 2022
-        - 2019
+        WIN_VER:
+        - ltsc2025
+        - ltsc2022
+        - ltsc2019
+        - 20H2
+        - 2009
+        - 2004
+        - 1909
+        - 1903
+        - 1809
+        - 1803
+        - 1709
         VS_VER:
         - 2022
         - 2019
         - 2017
-    runs-on: windows-${{ matrix.WIN_VER }}
+    runs-on: windows-2022
     permissions:
       contents: read
       packages: write
