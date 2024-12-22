@@ -5,6 +5,8 @@ on:
 
 jobs:
   build:
+    env:
+      WIN_VER_LATEST: ltsc2022
     strategy:
       fail-fast: false
       matrix:
@@ -55,7 +57,7 @@ jobs:
         --isolation=hyperv
         .
     - name: Tag latest
-      if: ${{ matrix.WIN_VER == matrix.WIN_VER[0] }}
+      if: ${{ matrix.WIN_VER == env.WIN_VER_LATEST }}
       run: |
         docker tag ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools:${{ matrix.WIN_VER }} ${{ secrets.DOCKERHUB_USERNAME }}/visualstudio${{ matrix.VS_VER }}buildtools
         docker tag ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools:${{ matrix.WIN_VER }} ghcr.io/${{ github.repository_owner }}/visualstudio${{ matrix.VS_VER }}buildtools
