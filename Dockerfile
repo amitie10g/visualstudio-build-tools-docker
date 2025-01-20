@@ -7,7 +7,7 @@ SHELL ["powershell", "-Command"]
 
 # 2022, 2019, 2017
 ARG VS_VER=2022
-RUN choco install -y visualstudio${env:VS_VER}buildtools; choco-cleaner
+RUN choco install -y --execution-timeout=20000 visualstudio${env:VS_VER}buildtools; choco-cleaner
 
 WORKDIR C:\\Users\\ContainerUser
 
